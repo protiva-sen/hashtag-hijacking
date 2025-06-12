@@ -1,1 +1,1 @@
-API_KEY = "YAIzaSyDz-hIiz3-c2D73yAl6BWvr-Y1k71KZtV0"
+API_KEY = "AIzaSyDz-hIiz3-c2D73yAl6BWvr-Y1k71KZtV0"
