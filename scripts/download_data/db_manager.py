@@ -14,6 +14,7 @@ def init_db():
             tags TEXT,
             category_id TEXT,
             default_audio_language TEXT,
+            default_language TEXT,
             duration TEXT,
             dimension TEXT,
             definition TEXT,

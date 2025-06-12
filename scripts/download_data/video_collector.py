@@ -73,6 +73,7 @@ def fetch_videos(query, start, end):
                 str(snippet.get("tags", [])),
                 snippet.get("categoryId", ""),
                 snippet.get("defaultAudioLanguage", ""),
+                snippet.get("defaultLanguage", ""),
                 content.get("duration", ""),
                 content.get("dimension", ""),
                 content.get("definition", ""),
