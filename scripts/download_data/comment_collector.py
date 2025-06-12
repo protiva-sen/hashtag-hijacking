@@ -17,8 +17,14 @@ def fetch_comments(video_id):
         if next_page_token:
             params["pageToken"] = next_page_token
 
-        response = requests.get(url, params=params).json()
-        for item in response.get("items", []):
+        response = requests.get(url, params=params)
+        if response.status_code == 403 and 'commentsDisabled' in response.text:
+            print(f"Comments are disabled for video: {video_id}")
+            comments.append((f"{video_id}_disabled", video_id, "disabled", "", ""))
+            break
+
+        data = response.json()
+        for item in data.get("items", []):
             snippet = item["snippet"]["topLevelComment"]["snippet"]
             comments.append((
                 item["id"],
@@ -28,7 +34,7 @@ def fetch_comments(video_id):
                 snippet.get("publishedAt", "")
             ))
 
-        next_page_token = response.get("nextPageToken")
+        next_page_token = data.get("nextPageToken")
         if not next_page_token:
             break
 
