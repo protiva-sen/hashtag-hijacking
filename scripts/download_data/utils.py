@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone, timedelta
 
 def generate_hourly_ranges(start_date, end_date):
     current = start_date
@@ -12,3 +12,7 @@ def to_rfc3339(dt):
     else:
         dt = dt.astimezone(timezone.utc)
     return dt.isoformat().replace('+00:00', 'Z')
+
+
+def clean_text(text):
+    return text.replace('\n', ' ').replace('\r', ' ').strip()
