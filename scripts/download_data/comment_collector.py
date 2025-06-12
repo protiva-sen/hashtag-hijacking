@@ -18,9 +18,10 @@ def fetch_comments(video_id):
             params["pageToken"] = next_page_token
 
         response = requests.get(url, params=params)
+
         if response.status_code == 403 and 'commentsDisabled' in response.text:
             print(f"Comments are disabled for video: {video_id}")
-            comments.append((f"{video_id}_disabled", video_id, "disabled", "", ""))
+            comments.append((f"disabled-{video_id}", video_id, "disabled", "", ""))
             break
 
         data = response.json()
