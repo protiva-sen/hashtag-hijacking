@@ -20,14 +20,3 @@ def to_rfc3339(dt):
 
 def clean_text(text):
     return text.replace('\n', ' ').replace('\r', ' ').strip()
-
-def save_state(query, start):
-    state = {"last_query": query, "last_start": start.isoformat()}
-    with open(STATE_FILE, "w") as f:
-        json.dump(state, f)
-
-def load_state():
-    if os.path.exists(STATE_FILE):
-        with open(STATE_FILE, "r") as f:
-            return json.load(f)
-    return None
