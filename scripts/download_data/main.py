@@ -10,28 +10,23 @@ import os
 STATE_FILE = "state.json"
 
 def get_queries(search_queries_file):
-    """Reads queries from file (one per line)."""
     with open(search_queries_file, 'r') as f:
         return [line.strip() for line in f if line.strip()]
 
 def load_state():
-    """Loads the state.json file (completed queries per hour)."""
     if os.path.exists(STATE_FILE):
         with open(STATE_FILE, 'r') as f:
             return json.load(f)
     return {}
 
 def save_state(state):
-    """Saves current progress to state.json."""
     with open(STATE_FILE, 'w') as f:
         json.dump(state, f, indent=4)
 
 def is_done(state, query, start_str):
-    """Checks whether a query-hour has already been processed."""
     return query in state and start_str in state[query]
 
 def mark_done(state, query, start_str):
-    """Marks a query-hour pair as completed in state.json."""
     if query not in state:
         state[query] = {}
     state[query][start_str] = "done"
@@ -107,7 +102,7 @@ def main():
             mark_done(state, query, start_str)
             save_state(state)  # save the state after each successful query
             # push to database
-            
+
         except Exception as e:
             query = youtube_api.curr_query
             start = youtube_api.curr_start
