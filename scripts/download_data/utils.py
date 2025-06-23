@@ -2,7 +2,7 @@ from datetime import datetime, timezone, timedelta
 import json
 import os
 
-STATE_FILE = "state.json"
+# STATE_FILE = "state.json"
 
 
 def generate_hourly_ranges(start_date, end_date):
