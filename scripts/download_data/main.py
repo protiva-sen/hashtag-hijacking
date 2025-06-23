@@ -4,10 +4,11 @@ from utils import generate_hourly_ranges
 from scripts.download_data.youtubeapi import YouTubeAPI
 import json
 import pandas as pd
-from sqlalchemy import create_engine
+import sqlite3
 import os
 
 STATE_FILE = "state.json"
+DEFAULT_DB_FILE = "youtube.db"
 
 def get_queries(search_queries_file):
     with open(search_queries_file, 'r') as f:
@@ -76,9 +77,10 @@ def main():
     # make all data queries in youtube_db
     # get all queries in youtube_db
 
-    engine = create_engine(config['DB_URL'])
     youtube_api = YouTubeAPI(config['API_KEY'])
     state = load_state()
+    conn = sqlite3.connect(DEFAULT_DB_FILE)
+
     incomplete_queries = fetch_incomplete(start_date, end_date, SEARCH_QUERIES)
 
     for query, start, end in incomplete_queries:
@@ -95,7 +97,7 @@ def main():
             videos_df = pd.DataFrame(videos)
             videos_df.to_sql(
                 'youtube_videos',
-                con=engine,
+                con=conn,
                 if_exists='append',
                 index=False
             )
