@@ -1,7 +1,7 @@
 import argparse
 from datetime import datetime
 from utils import generate_hourly_ranges
-from scripts.download_data.youtubeapi import YouTubeAPI
+from youtubeapi import YouTubeAPI
 import json
 import pandas as pd
 import sqlite3
@@ -61,18 +61,23 @@ def fetch_incomplete(start_date, end_date, queries):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--start_date', type=str, required=True)
-    parser.add_argument('--end_date', type=str, required=True)
+    parser.add_argument('--start_date', type=str, required=True, help="Start date in format YYYY-MM-DDTHH e.g. 2023-01-01T00:00")
+    parser.add_argument('--end_date', type=str, required=True,  help="End date in format YYYY-MM-DDTHH e.g. 2023-01-01T23:59")
     parser.add_argument('--queries', type=str, required=True, help="text file with search queries, one per line")
+    parser.add_argument('--api_key', type=str, required=False, help="YouTube API key to override config.json")
     args = parser.parse_args()
 
-    start_date = datetime.strptime(args.start_date, "%Y-%m-%d")
-    end_date = datetime.strptime(args.end_date, "%Y-%m-%d")
+    start_date = datetime.strptime(args.start_date, "%Y-%m-%dT%H:%M")
+    end_date = datetime.strptime(args.end_date, "%Y-%m-%dT%H:%M")
     search_queries_file = args.queries
     SEARCH_QUERIES = get_quries(search_queries_file)
 
-    with open('config.json', 'r') as f:
-        config = json.load(f)
+    if args.api_key:
+        api_key = args.api_key
+    else:
+        with open('config.json', 'r') as f:
+            config = json.load(f)
+            api_key = config.get('API_KEY')
 
     # make all data queries in youtube_db
     # get all queries in youtube_db
