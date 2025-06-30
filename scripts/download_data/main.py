@@ -7,8 +7,8 @@ import pandas as pd
 import sqlite3
 import os
 
-STATE_FILE = "state.json"
-DEFAULT_DB_FILE = "youtube.db"
+STATE_FILE = "/netfiles/compethicslab/hashtag-hijacking/state.json"
+DEFAULT_DB_FILE = "/netfiles/compethicslab/hashtag-hijacking/youtube.db"
 
 def get_queries(search_queries_file):
     with open(search_queries_file, 'r') as f:
@@ -93,6 +93,7 @@ def main():
 
        
         try:
+            # fix such that if there is a quota error or any other error, it will skip
             videos = youtube_api.fetch_data(query, start, end)
             if not videos:
                 print(f"No videos found for query '{query}' from {start_str} to {end.isoformat()}")
@@ -100,6 +101,7 @@ def main():
                 continue
 
             videos_df = pd.DataFrame(videos)
+            videos_df['query'] = query
             videos_df.to_sql(
                 'youtube_videos',
                 con=conn,
