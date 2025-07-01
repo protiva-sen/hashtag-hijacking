@@ -113,13 +113,36 @@ def main():
             # push to database
 
         except Exception as e:
-            query = youtube_api.curr_query
-            start = youtube_api.curr_start
-            end = youtube_api.curr_end
-            page_num = youtube_api.curr_page
-            print(f"Error fetching data for query '{query}' from {start_str} to {end.isoformat()}: {e}")
+
+            failed_query = youtube_api.curr_query or query
+            failed_start = youtube_api.curr_start or start
+            failed_end = youtube_api.curr_end or end
+            page_num = youtube_api.curr_page or "?"
+
+            err_msg = str(e).lower()
+            if "quota" in err_msg or "403" in err_msg:
+                print(f"[Quota Error] Skipping query '{failed_query}' from {failed_start} to {failed_end}")
+            else:
+                print(f"[Error] Query '{failed_query}' from {failed_start} to {failed_end} (page {page_num}): {e}")
             with open('error_log.txt', 'a') as error_file:
-                error_file.write(f"Error for query '{query}' from {start_str} to {end.isoformat()}: {e}\n")
+                error_file.write(f"Error for query '{failed_query}' from {failed_start.isoformat()} to {failed_end.isoformat()} (page {page_num}): {e}\n")  
+
+            start_str_log = failed_start.isoformat() if hasattr(failed_start, "isoformat") else str(failed_start)
+            end_str_log = failed_end.isoformat() if hasattr(failed_end, "isoformat") else str(failed_end) 
+
+            # Log the error with context
+            with open('error_log.txt', 'a') as error_file:
+                 error_file.write(
+                        f"Error for query '{failed_query}' from {start_str_log} to {end_str_log} (page {page_num}): {e}\n")  
+            
+            
+            # Log the error with query and time range
+            youtube_api.curr_query = query
+            youtube_api.curr_start = start
+            youtube_api.curr_end = end
+            # youtube_api.curr_page = 1  # Reset page number for the next attempt
+
+            save_state(state)  # save the state even if there is an error                 
             
             continue
 
