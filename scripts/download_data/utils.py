@@ -5,11 +5,11 @@ import os
 # STATE_FILE = "state.json"
 
 
-def generate_hourly_ranges(start_date, end_date):
+def generate_time_ranges(start_date, end_date, deltahours):
     current = start_date
     while current < end_date:
-        yield current, current + timedelta(hours=1)
-        current += timedelta(hours=1)
+        yield current, current + timedelta(hours=deltahours)
+        current += timedelta(hours=deltahours)
 
 def to_rfc3339(dt):
     if dt.tzinfo is None:

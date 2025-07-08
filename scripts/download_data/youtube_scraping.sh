@@ -12,14 +12,11 @@
 
 
 source ~/.bash_profile
-conda hashtag-hijacking
-
-cd scripts/download_data
+conda activate hashtag-hijacking
 
 python main.py \
     --start_date 2023-07-01T00:00 \
     --end_date 2025-07-01T00:00  \
-    --queries data/hashtags.txt \
-    --api_key AIzaSyDz-hIiz3-c2D73yAl6BWvr-Y1k71KZtV0
+    --query mrbeast
 
 
