@@ -88,14 +88,14 @@ def main():
             # fix such that if there is a quota error or any other error, it will skip
             videos = youtube_api.fetch_data(query, start, end)
             if not videos:
-                print(f"No videos found for query '{query}' from {start_str} to {end.isoformat()}")
+                print(f"No videos found for query '{query}' from {start_str} to {end.isoformat()}", flush=True)
                 mark_done(state, query, start_str)
                 continue
 
             videos_df = pd.DataFrame(videos)
             
             if args.DEBUG:
-                print(f"DEBUG: Fetched {len(videos_df)} videos for query '{query}' from {start_str} to {end.isoformat()}")
+                print(f"DEBUG: Fetched {len(videos_df)} videos for query '{query}' from {start_str} to {end.isoformat()}", flush=True)
 
             videos_df.to_sql(
                 'youtube_videos',
@@ -116,9 +116,9 @@ def main():
 
             err_msg = str(e).lower()
             if "quota" in err_msg or "403" in err_msg:
-                print(f"[Quota Error] Skipping query '{failed_query}' from {failed_start} to {failed_end}")
+                print(f"[Quota Error] Skipping query '{failed_query}' from {failed_start} to {failed_end}", flush=True)
             else:
-                print(f"[Error] Query '{failed_query}' from {failed_start} to {failed_end} (page {page_num}): {e}")
+                print(f"[Error] Query '{failed_query}' from {failed_start} to {failed_end} (page {page_num}): {e}", flush=True)
             with open('error_log.txt', 'a') as error_file:
                 error_file.write(f"Error for query '{failed_query}' from {failed_start.isoformat()} to {failed_end.isoformat()} (page {page_num}): {e}\n")  
 

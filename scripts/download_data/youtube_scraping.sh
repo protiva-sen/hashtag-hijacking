@@ -16,7 +16,7 @@ conda activate hashtag-hijacking
 python main.py \
     --start_date 2023-07-01T00:00 \
     --end_date 2025-07-01T00:00  \
-    --query bmw \
+    --query mrbeast \
     --DEBUG
 
 

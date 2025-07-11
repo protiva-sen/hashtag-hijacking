@@ -1,4 +1,6 @@
 *.csv
+*.out
+*.err
 *.json
 __pycache__/
 *.pyc
