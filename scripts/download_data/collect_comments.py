@@ -4,7 +4,7 @@ import sqlite3
 import argparse
 import pandas as pd
 from tqdm import tqdm
-from commentapi import YouTubeCommentAPI
+from youtubeapi import YouTubeAPI
 
 COMMENT_STATE_FILE = "/netfiles/compethicslab/hashtag-hijacking/state_comments.json"
 DEFAULT_DB_FILE = "/netfiles/compethicslab/hashtag-hijacking/youtube.db"
@@ -36,10 +36,10 @@ def main():
     conn = sqlite3.connect(DEFAULT_DB_FILE)
     video_ids = get_video_ids(conn)
     state = load_state()
-    api = YouTubeCommentAPI(api_key)
+    api = YouTubeAPI(api_key)
 
     if args.DEBUG:
-        video_ids = video_ids[:10]
+        print(f"[DEBUG] Total videos to process: {len(video_ids)}")
 
     for video_id in tqdm(video_ids, desc="Fetching comments"):
         if state.get(video_id) == "done":
