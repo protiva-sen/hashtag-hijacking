@@ -13,7 +13,7 @@
 source ~/.bash_profile
 conda activate hashtag-hijacking
 
-python main.py \
+python collect_posts.py \
     --start_date 2023-07-01T00:00 \
     --end_date 2025-07-01T00:00  \
     --query mrbeast \
