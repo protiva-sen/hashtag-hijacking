@@ -11,12 +11,13 @@
 
 
 source ~/.bash_profile
+conda init
 conda activate hashtag-hijacking
 
 python collect_posts.py \
     --start_date 2023-07-01T00:00 \
     --end_date 2025-07-01T00:00  \
-    --query mrbeast \
+    --query whatsapp \
     --DEBUG
 
 
