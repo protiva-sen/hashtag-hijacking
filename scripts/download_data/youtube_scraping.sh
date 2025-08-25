@@ -17,7 +17,7 @@ conda activate hashtag-hijacking
 python collect_posts.py \
     --start_date 2023-07-01T00:00 \
     --end_date 2025-07-01T00:00  \
-    --query whatsapp \
+    --query geography \
     --DEBUG
 
 
