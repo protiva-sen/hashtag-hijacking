@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #SBATCH --job-name=youtube_comments_collection
 #SBATCH --output=comments_collection.out
 #SBATCH --error=comments_collection.err
