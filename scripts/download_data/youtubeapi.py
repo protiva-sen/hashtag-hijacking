@@ -1,6 +1,5 @@
 from utils import to_rfc3339, clean_text
 import requests
-from youtube_transcript_api import YouTubeTranscriptApi
 
 class YouTubeAPI:
     def __init__(self, API_KEY):
@@ -160,10 +159,3 @@ class YouTubeAPI:
             page_token = data["nextPageToken"]
 
         return comments
-    
-    def fetch_transcript(self, video_id, languages=['en']):
-        transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
-        transcript = transcript_list.find_transcript([t.language_code for t in transcript_list if t.language_code in languages] or [t.language_code for t in transcript_list])
-        return transcript.fetch(), transcript.language_code
-
-
