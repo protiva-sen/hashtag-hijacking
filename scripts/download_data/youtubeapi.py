@@ -8,6 +8,7 @@ class YouTubeAPI:
         self.videos_url = "https://www.googleapis.com/youtube/v3/videos"
         self.channel_url = "https://www.googleapis.com/youtube/v3/channels"
         self.comment_url = "https://www.googleapis.com/youtube/v3/commentThreads"
+        self.captions_url = "https://www.googleapis.com/youtube/v3/captions"
         self.curr_query = None
         self.curr_start = None
         self.curr_end = None
@@ -159,3 +160,7 @@ class YouTubeAPI:
             page_token = data["nextPageToken"]
 
         return comments
+    
+    
+
+
