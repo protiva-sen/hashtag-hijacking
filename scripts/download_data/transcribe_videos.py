@@ -22,49 +22,22 @@ def load_state():
     if os.path.exists(TRANS_STATE_FILE):
         with open(TRANS_STATE_FILE, 'r') as f:
             return json.load(f)
-    else:
-        return {"done": []}   
+    return {}
 
 def save_state(state):
     with open(TRANS_STATE_FILE, 'w') as f:
-        json.dump(state, f, indent=2) 
+        json.dump(state, f, indent=4) 
 
-def is_done(state, query, start):
-    return query in state and start in state[query]
+def is_done(state, query, start_date, video_id):
+    return query in state and start_date in state[query] and video_id in state[query][start_date]
 
-
-def mark_done(state, query, start):
+def mark_done(state, query, start_date, video_id):
     if query not in state:
         state[query] = {}
-    state[query][start] = "done"
-    save_state(state)
-    
+    if start_date not in state[query]:
+        state[query][start_date] = {}
+    state[query][start_date][video_id] = "done"
 
-def fetch_incomplete(query, start_date, end_date):
-    incomplete = []
-
-    state = load_state()
-
-    start_dt = datetime.fromisoformat(start_date)
-    end_dt = datetime.fromisoformat(end_date)
-    current_dt = start_dt
-
-    while current_dt < end_dt:
-        day_str = current_dt.date().isoformat()
-
-        if is_done(state, query, day_str):
-            print(f"{query} on {day_str} already done")
-        else:
-            incomplete.append((query, day_str, (current_dt + timedelta(days=1)).date().isoformat()))
-
-        current_dt += timedelta(days=1)
-
-    return incomplete
-
-def get_video_ids(conn):
-    query = 'SELECT DISTINCT video_id FROM youtube_videos'
-    return [row[0] for row in conn.execute(query).fetchall()]
-    
 def get_video_ids(conn, search_query, start_date, end_date):
     cursor = conn.cursor()
     cursor.execute("""
@@ -76,7 +49,20 @@ def get_video_ids(conn, search_query, start_date, end_date):
     """, (search_query, start_date, end_date))
     return [row[0] for row in cursor.fetchall()]
 
+def fetch_incomplete(state, conn, search_query, start_date, end_date):
+    incomplete = []
+    
+    all_video_ids = get_video_ids(conn, search_query, start_date, end_date)
+    
+    for video_id in all_video_ids:
+        if not is_done(state, search_query, start_date, video_id):
+            incomplete.append(video_id)
+    
+    return incomplete
+
 def get_video_audio(video_id):
+    COOKIE_FILE ="cookies.txt"
+
     ydl_opts = {
         'format': 'bestaudio/best',
         'outtmpl': os.path.join(Temp_dir, f'{video_id}.%(ext)s'),
@@ -87,6 +73,14 @@ def get_video_audio(video_id):
         }],
         'quiet': True,
         'no_warnings': True,
+        'cookiefile': COOKIE_FILE,
+        'retries': 5,                 
+        'sleep_interval': 5,         
+        'min_sleep_interval': 10,      
+        'max_sleep_interval': 30,    
+        'downloader_args': {'http_chunk_size': 1048576},
+        'extractor_args': {'youtube': {'player_client': ['mweb']}}, 
+        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     }
     
     url = f"https://www.youtube.com/watch?v={video_id}"
@@ -95,14 +89,16 @@ def get_video_audio(video_id):
             ydl.download([url])
             
         audio_path = os.path.join(Temp_dir, f"{video_id}.mp3")
+
         if os.path.exists(audio_path):
             return audio_path
         else:
             return None
         
     except Exception as e:
-        print(f"Error downloading audio for video {video_id}: {e}")
+        print(f"Error downloading audio for video {video_id}: {e}", flush=True)
         return None
+    
     
 def ensure_transcript_table(conn):
     conn.execute("""
@@ -149,49 +145,59 @@ def main():
     parser.add_argument('--DEBUG', action='store_true', help="Run in debug mode with fewer queries")
     args = parser.parse_args()
     model_name = args.model_name
+    query = args.query
 
     model = whisper.load_model(model_name)
     state = load_state()
-    conn = sqlite3.connect(DEFAULT_DB_FILE)
+    conn = sqlite3.connect(args.db_file)
     ensure_transcript_table(conn)
 
     csv_filename = f"transcripts_{args.query}_{args.start_date}_{args.end_date}.csv"
     csv_path = os.path.join(CSV_OUTPUT_DIR, csv_filename)
 
-    incomplete_queries = fetch_incomplete(args.query, args.start_date, args.end_date)
+    incomplete_video_ids = fetch_incomplete(state, conn, query, args.start_date, args.end_date)
 
-    for query, start, end in tqdm(incomplete_queries):
-        if is_done(state, query, start):
-            continue
+    print(f"\n{len(incomplete_video_ids)} videos to process", flush=True)
+    
+    if not incomplete_video_ids:
+        print("No videos to process. All done!", flush=True)
+        conn.close()
+        return
 
-        try: 
-            video_ids = get_video_ids(conn, query, start, end)
-            print(f"\n {len(video_ids)} videos to process")
-            
-            if not video_ids:
-                mark_done(state, query, start)
+    for video_id in tqdm(incomplete_video_ids, desc=f"Processing videos for {query} from {args.start_date} to {args.end_date}"):
+        if args.DEBUG:
+            print(f"Processing video: {video_id}", flush=True)
+        
+        try:
+            audio_path = get_video_audio(video_id)
+            if not audio_path:
+                print(f"Failed to download audio for video {video_id}", flush=True)
                 continue
-
-            for video_id in tqdm(video_ids, desc=f"Processing videos for {query} from {start} to {end}", disable=args.DEBUG):
-                if args.DEBUG:
-                    print(f"Processing video: {video_id}")
-                audio_path = get_video_audio(video_id)
-                if not audio_path:
-                    print(f"Failed to download audio for video {video_id}")
-                    continue
-                text = model.transcribe(audio_path)["text"]
-                save_text_to_sql(conn, video_id, text)
-                save_transcript_to_csv(video_id, text, query, csv_path)
+            
+            text = model.transcribe(audio_path)["text"]
+            save_text_to_sql(conn, video_id, text)
+            save_transcript_to_csv(video_id, text, query, csv_path)
+            
+            if os.path.exists(audio_path):
                 os.remove(audio_path)
-
-            mark_done(state, query, start)
-            delete_temp_audios()
+            
+            mark_done(state, query, args.start_date, video_id)
+            save_state(state)
+            
         except Exception as e:
-            print(f"Error processing {query} from {start} to {end}: {e}")
+            print(f"[Error] Video {video_id}: {e}", flush=True)
+            
+            with open('transcription_error_log.txt', 'a') as error_file:
+                error_file.write(
+                    f"Error for video_id '{video_id}' (query: '{query}', "
+                    f"time_range: {args.start_date} to {args.end_date}): {e}\n"
+                )
+            
+            save_state(state)
             continue
 
+    delete_temp_audios()
     conn.close()
+
 if __name__ == "__main__":  
     main()
-       
-
