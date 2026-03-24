@@ -14,18 +14,12 @@ STATE_FILE = "/netfiles/compethicslab/hashtag-hijacking/state_hashtags.json"
 DEFAULT_DB_FILE = "/netfiles/compethicslab/hashtag-hijacking/youtube_hashtags.db"
 DELTAHOURS = 1
 
-# ── Broad seed words ──────────────────────────────────────────────────────────
-# These are common, content-neutral words designed to cast the widest possible
-# net across YouTube videos so we can discover hashtags organically.
-# Add or remove seeds here to tune coverage vs. quota cost.
 SEEDS = [
     "the", "and", "to", "a", "is",
     "in", "of", "for", "my", "new",
     "how", "why", "best", "today", "live",
 ]
 
-
-# ── state helpers ─────────────────────────────────────────────────────────────
 
 def load_state():
     if os.path.exists(STATE_FILE):
@@ -70,8 +64,6 @@ def mark_done(state, seed, start_str):
     state[seed][start_str] = "done"
 
 
-# ── DB helper ─────────────────────────────────────────────────────────────────
-
 def ensure_hashtags_table(conn):
     conn.execute("""
         CREATE TABLE IF NOT EXISTS hashtags (
@@ -83,12 +75,10 @@ def ensure_hashtags_table(conn):
     conn.commit()
 
 
-# ── main ──────────────────────────────────────────────────────────────────────
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Broad-sample YouTube videos and collect hashtags from descriptions."
-    )
+        description="Collect hashtags from YouTube videos matching seed queries and time windows.")
     parser.add_argument(
         '--start_date', type=str, required=True,
         help="Start date in format YYYY-MM-DDTHH:MM  e.g. 2023-01-01T00:00"
