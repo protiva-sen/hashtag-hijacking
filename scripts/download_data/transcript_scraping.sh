@@ -16,7 +16,7 @@ conda activate hashtag-hijacking
 
 python transcribe_videos.py \
     --model_name base \
-    --start_date 2023-10-01T00:00 \
-    --end_date 2023-11-01T00:00  \
+    --start_date 2023-11-01T00:00 \
+    --end_date 2023-11-06T00:00  \
     --query bmw \
     --DEBUG

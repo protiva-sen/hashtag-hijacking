@@ -75,7 +75,7 @@ def get_video_audio(video_id):
         'no_warnings': True,
         'cookiefile': COOKIE_FILE,
         'retries': 5,                 
-        'sleep_interval': 5,         
+        'sleep_interval': 10,         
         'min_sleep_interval': 10,      
         'max_sleep_interval': 30,    
         'downloader_args': {'http_chunk_size': 1048576},

@@ -8,9 +8,9 @@ import sqlite3
 import os
 from tqdm import tqdm
 
-STATE_FILE = "/netfiles/compethicslab/hashtag-hijacking/state_final.json"
-DEFAULT_DB_FILE = "/netfiles/compethicslab/hashtag-hijacking/youtube_final.db"
-DELTAHOURS = 1
+STATE_FILE = "/netfiles/compethicslab/hashtag-hijacking/state.json"
+DEFAULT_DB_FILE = "/netfiles/compethicslab/hashtag-hijacking/youtube.db"
+DELTAHOURS = 24
 
 def get_queries(search_queries_file):
     with open(search_queries_file, 'r') as f:
