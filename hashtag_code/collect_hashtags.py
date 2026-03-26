@@ -17,7 +17,7 @@ DELTAHOURS = 1
 SEEDS = [
     "the", "and", "to", "a", "is",
     "in", "of", "for", "my", "new",
-    "how", "why", "best", "today", "live",
+    "how", "why", "your", "our", ".", "?", ","
 ]
 
 
