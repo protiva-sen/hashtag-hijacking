@@ -60,13 +60,12 @@ class YouTubeAPI:
 
     def _fetch_descriptions_batch(self, video_ids):
         """
-        Fetch (video_id, description) pairs for a batch of up to 50 video IDs.
-        Uses fields mask to minimise quota consumption.
+        Fetch (video_id, title, description) 
         """
         params = {
             "part": "snippet",
             "id": ",".join(video_ids),
-            "fields": "items(id,snippet(description))",
+            "fields": "items(id,snippet(title, description))",
             "key": self.API_KEY,
         }
         res = requests.get(self.videos_url, params=params)
@@ -74,8 +73,9 @@ class YouTubeAPI:
         results = []
         for item in res.json().get("items", []):
             vid_id = item.get("id", "")
+            title = item.get("snippet", {}).get("title", "") or ""
             desc = item.get("snippet", {}).get("description", "") or ""
-            results.append((vid_id, desc))
+            results.append((vid_id, title,desc))
         return results
 
     @staticmethod
@@ -146,21 +146,12 @@ class YouTubeAPI:
         return videos
 
     def fetch_hashtags(self, seed, start=None, end=None):
-        """
-        Broad-sample videos matching `seed` within the optional time window,
-        fetch their descriptions in batches of 50, and extract hashtags.
-
-        Returns a list of dicts ready to be written to the hashtags table:
-            {seed, video_id, hashtag}
-        One row per (video_id, hashtag) pair.
-        """
         rows = []
         self.curr_query = seed
         self.curr_start = start
         self.curr_end = end
         self.curr_page = None
 
-        # ── 1. paginate search to collect all video IDs in this window ────────
         video_ids = []
         while True:
             ids_resp = self._fetch_ids(seed, start, end, self.curr_page)
@@ -175,15 +166,20 @@ class YouTubeAPI:
         if not video_ids:
             return rows
 
-        # ── 2. fetch descriptions in batches of 50 and extract hashtags ───────
         for i in range(0, len(video_ids), 50):
             batch = video_ids[i:i + 50]
-            for vid_id, desc in self._fetch_descriptions_batch(batch):
-                for tag in self.extract_hashtags(desc):
+            for vid_id, title, desc in self._fetch_descriptions_batch(batch):
+                seen = []
+                seen_set = set()
+                for tag in self.extract_hashtags(title) + self.extract_hashtags(desc):
+                    if tag not in seen_set:
+                        seen.append(tag)
+                        seen_set.add(tag)
+                if seen:
                     rows.append({
                         "seed": seed,
                         "video_id": vid_id,
-                        "hashtag": tag,
+                        "hashtag": ",".join(seen)
                     })
 
         return rows

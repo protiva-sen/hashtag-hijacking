@@ -69,7 +69,7 @@ def ensure_hashtags_table(conn):
         CREATE TABLE IF NOT EXISTS hashtags (
             seed        TEXT,
             video_id    TEXT,
-            hashtag     TEXT
+            hashtag     TEXT  --- comma-separated list of hashtags
         )
     """)
     conn.commit()
