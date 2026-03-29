@@ -12,12 +12,12 @@ from youtubeapi import YouTubeAPI
 
 STATE_FILE = "/netfiles/compethicslab/hashtag-hijacking/state_hashtags.json"
 DEFAULT_DB_FILE = "/netfiles/compethicslab/hashtag-hijacking/youtube_hashtags.db"
-DELTAHOURS = 1
+DELTAHOURS = 6    #1. # 6 hours
 
 SEEDS = [
-    "the", "and", "to", "a", "is",
-    "in", "of", "for", "my", "new",
-    "how", "why", "your", "our", ".", "?", ","
+    "the", "and", "to", "a", "is", "on", "with", "life"
+    "in", "of", "for", "my", "new", 
+    "how", "why", "your", "our", "video", "live", "music"
 ]
 
 

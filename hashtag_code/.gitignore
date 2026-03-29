@@ -1,0 +1,9 @@
+*.csv
+*.out
+*.err
+*.json
+__pycache__/
+*.pyc
+config.json
+*/.ipynb_checkpoints/
+*.txt

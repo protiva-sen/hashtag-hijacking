@@ -15,6 +15,6 @@ conda init
 conda activate hashtag-hijacking
 
 python collect_hashtags.py \
-    --start_date 2025-10-02T00:00 \
-    --end_date 2025-10-03T00:00 \
+    --start_date 2025-01-16T00:00 \
+    --end_date 2025-01-21T00:00 \
     --DEBUG
